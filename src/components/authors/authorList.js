@@ -2,6 +2,7 @@
 
 var React = require("react");
 var AuthorApi = require("../../api/AuthorApi");
+var Link = require('react-router').Link;
 
 var AuthorList = React.createClass({
 
@@ -18,7 +19,7 @@ var AuthorList = React.createClass({
 
 						<tr key={author.id}>
 
-							<td><a href={ "/#authors/" + author.id }>{author.id}</a></td>
+							<td><Link to='manageAuthor' params={{ id: author.id }}>{author.id}</Link></td>
 							<td>{ author.firstName } { author.lastName}</td>
 						</tr>
 

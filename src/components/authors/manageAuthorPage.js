@@ -4,6 +4,7 @@ var React = require('react');
 var AuthorForm = require('./authorForm');
 var AuthorApi = require('../../api/authorApi');
 var Router = require('react-router');
+var Promise = require("bluebird");
 
 var ManageAuthorPage = React.createClass({
 
@@ -13,15 +14,39 @@ var ManageAuthorPage = React.createClass({
 
 	],
 
+	statics: {
+		willTransitionFrom: function(transition, component){
+
+			if(component.state.dirty && !confirm('Leave with saving?')){
+				transition.abort();
+			}
+
+		}
+
+	},
+
 	getInitialState: function(){
 
 		return {
-			author: { firstName: '', lastName: '', id: ''}
+			author: { firstName: '', lastName: '', id: '', dirty: false }, 
+			errors: {}
 		};
 
 	},
 
+	componentWillMount: function(){
+
+		var authorId = this.props.params.id; //author:id
+
+		if(authorId) {
+			this.setState({author: AuthorApi.getAuthorById(authorId)});
+		}
+
+	}, 
+
 	setAuthorState: function(event){
+
+		this.setState({ dirty: true });
 
 		var field = event.target.name;
 		var value = event.target.value;
@@ -32,14 +57,71 @@ var ManageAuthorPage = React.createClass({
 
 	}, 
 
+	authorFormIsValid: function(){
+
+		var formIsValid = true;
+		this.state.errors = {};
+
+		if(this.state.author.firstName.length < 3){
+			this.state.errors.firstName = "first name must be at least 3 chars";
+			formIsValid = false;
+		}
+
+		if(this.state.author.lastName.length < 3){
+			this.state.errors.lastName = "last name must be at least 3 chars";
+			formIsValid = false;
+		}
+
+		this.setState({ errors: this.state.errors });
+
+		return formIsValid;
+
+	},
+
 	saveAuthor: function(event){
 
 		event.preventDefault();
+
+		this.setState({ dirty: false });
+
+		if(!this.authorFormIsValid())
+		{			
+			return;
+		}
+
+		
 		AuthorApi.saveAuthor(this.state.author);
 
-		this.transitionTo('authors');
+		var self = this;
 
+		this.setStateAsync({ dirty: false }, this)
+			.then(function(){
+
+				self.transitionTo('authors');		
+
+			})
+			.catch(function(e){
+
+				console.error(e);
+
+			});
+
+		
 	},
+
+	setStateAsync: function(setStateConfig, self){
+
+		return new Promise(function(resolve, reject){
+
+			self.setState(setStateConfig, function(){
+
+				resolve();
+
+			});
+
+		});
+
+	}, 
 
 	render: function(){
 
@@ -48,7 +130,9 @@ var ManageAuthorPage = React.createClass({
 			<AuthorForm 
 			author={ this.state.author }
 			onChange={ this.setAuthorState } 
-			onSave={ this.saveAuthor }/>
+			onSave={ this.saveAuthor }
+			errors={ this.state.errors }
+			/>
 
 		);
 
