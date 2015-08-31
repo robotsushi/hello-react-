@@ -1,10 +1,12 @@
 "use strict";
 
 var React = require('react');
-var AuthorForm = require('./authorForm');
-var AuthorActions = require('../../actions/authorActions');
-var AuthorStore = require('../../stores/authorStore');
 var Router = require('react-router');
+var AuthorForm = require('./authorForm');
+
+var AuthorActions = require('../../Actions/authorActions');
+var AuthorStore = require('../../Stores/authorStore');
+
 var Promise = require("bluebird");
 
 var ManageAuthorPage = React.createClass({

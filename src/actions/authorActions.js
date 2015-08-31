@@ -2,7 +2,7 @@
 
 var Dispatcher = require('../Dispatcher/appDispatcher');
 var AuthorApi = require('../api/authorApi');
-var ActionTypes = require('./actionTypes');
+var ActionTypes = require('../constants/actionTypes');
 
 var AuthorActions = {
 
